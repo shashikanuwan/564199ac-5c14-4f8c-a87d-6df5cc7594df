@@ -21,37 +21,23 @@ jobs:
           coverage: xdebug
 
       - name: Copy .env
-        run: |
-          cd backend
-          php -r "file_exists('.env') || copy('.env.example', '.env');"
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
       - name: Install Dependencies
-        run: |
-          cd backend
-          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Generate key
-        run: |
-          cd backend
-          php artisan key:generate
+        run: php artisan key:generate
 
       - name: Run Tests
-        run: |
-          cd backend
-          ./vendor/bin/pest --ci
+        run: ./vendor/bin/pest --ci
 
       - name: Test Coverage
-        run: |
-          cd backend
-          ./vendor/bin/pest --coverage
+        run: ./vendor/bin/pest --coverage
 
       - name: Type Coverage
-        run: |
-          cd backend
-          ./vendor/bin/pest --type-coverage
+        run: ./vendor/bin/pest --type-coverage
 
       - name: PHP-CS-Fixer
-        run: |
-          cd backend
-          vendor/bin/pint
+        run: vendor/bin/pint
 
