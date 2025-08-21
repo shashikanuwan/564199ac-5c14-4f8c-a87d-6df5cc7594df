@@ -1,0 +1,57 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  ci:
+    name: 🎉 Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Copy .env
+        run: |
+          cd backend
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Generate key
+        run: |
+          cd backend
+          php artisan key:generate
+
+      - name: Run Tests
+        run: |
+          cd backend
+          ./vendor/bin/pest --ci
+
+      - name: Test Coverage
+        run: |
+          cd backend
+          ./vendor/bin/pest --coverage
+
+      - name: Type Coverage
+        run: |
+          cd backend
+          ./vendor/bin/pest --type-coverage
+
+      - name: PHP-CS-Fixer
+        run: |
+          cd backend
+          vendor/bin/pint
+
