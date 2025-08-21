@@ -6,7 +6,7 @@ on:
 
 jobs:
   ci:
-    name: 🎉 Integration
+    name: 🎉 CI
     runs-on: ubuntu-latest
 
     steps:
