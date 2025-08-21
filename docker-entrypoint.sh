@@ -14,7 +14,7 @@ if [ ! -d vendor ]; then
 fi
 
 # Generate application key if it doesn't exist
-if [ ! -f .env ] || ! grep -q 'APP_KEY=' .env; then
+if ! grep -q '^APP_KEY=.*[A-Za-z0-9]' .env; then
     php artisan key:generate
     echo "Generated application key"
 fi

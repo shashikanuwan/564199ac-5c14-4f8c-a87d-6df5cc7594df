@@ -24,7 +24,7 @@ services:
             - ./:/var/www
         networks:
             - laravel
-        entrypoint: ["php", "vendor/bin/pest"] # runs Pest tests
+        command: php artisan test # runs Pest tests
 
 networks:
     laravel:
