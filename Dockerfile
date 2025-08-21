@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
+# Set working directory
+WORKDIR /var/www
+
 # Install Node.js & npm (optional, for Vite or frontend assets)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
-
-# Set working directory
-WORKDIR /var/www
 
 # Copy entrypoint script into the image
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
