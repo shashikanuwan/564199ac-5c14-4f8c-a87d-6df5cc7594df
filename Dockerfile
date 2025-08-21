@@ -14,3 +14,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 # Set working directory
 WORKDIR /var/www
+
+# Copy entrypoint script into the image
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
+# Make it executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
