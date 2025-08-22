@@ -29,8 +29,13 @@ readonly class FeedbackReportGenerator implements ReportGeneratorInterface
             return 'No completed assessments found for this student.';
         }
 
-        // latest response (by completed date)
-        usort($completedResponses, fn ($a, $b) => strtotime($b['completed']) <=> strtotime($a['completed']));
+        usort($completedResponses, function ($a, $b) {
+            $dateA = Carbon::createFromFormat('d/m/Y H:i:s', $a['completed']);
+            $dateB = Carbon::createFromFormat('d/m/Y H:i:s', $b['completed']);
+
+            return $dateB->getTimestamp() <=> $dateA->getTimestamp();
+        });
+
         $latestResponse = $completedResponses[0];
 
         $assessment = $this->assessments->findById($latestResponse['assessmentId']);
