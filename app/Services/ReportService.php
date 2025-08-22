@@ -2,21 +2,31 @@
 
 namespace App\Services;
 
+use App\Services\Reports\ReportGeneratorFactoryInterface;
 use InvalidArgumentException;
 
-class ReportService
+readonly class ReportService
 {
-    public function __construct(protected array $generators = []) {}
+    public function __construct(
+        private ReportGeneratorFactoryInterface $generatorFactory
+    ) {}
 
     public function generate(string $type, string $studentId): string
     {
-        if (! isset($this->generators[$type])) {
-            $supported = implode(', ', array_keys($this->generators));
+        try {
+            $generator = $this->generatorFactory->create($type);
+
+            return $generator->generate($studentId);
+        } catch (InvalidArgumentException $e) {
+            $supported = implode(', ', $this->getSupportedReportTypes());
             throw new InvalidArgumentException(
                 "Report type [$type] not supported. Supported types: [$supported]"
             );
         }
+    }
 
-        return $this->generators[$type]->generate($studentId);
+    public function getSupportedReportTypes(): array
+    {
+        return $this->generatorFactory->getSupportedTypes();
     }
 }

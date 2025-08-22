@@ -2,100 +2,36 @@
 
 namespace App\Services\Reports;
 
-use App\Repositories\Contracts\AssessmentRepositoryInterface;
-use App\Repositories\Contracts\QuestionRepositoryInterface;
-use App\Repositories\Contracts\ResponseRepositoryInterface;
-use App\Repositories\Contracts\StudentRepositoryInterface;
-use Carbon\Carbon;
+use App\Services\Reports\Analysis\QuestionAnalysisService;
+use App\Services\Reports\Data\AssessmentDataService;
+use App\Services\Reports\Data\StudentDataService;
+use App\Services\Reports\Formatters\DiagnosticReportFormatter;
 
 readonly class DiagnosticReportGenerator implements ReportGeneratorInterface
 {
     public function __construct(
-        private StudentRepositoryInterface $students,
-        private AssessmentRepositoryInterface $assessments,
-        private QuestionRepositoryInterface $questions,
-        private ResponseRepositoryInterface $responses
+        private StudentDataService $studentService,
+        private AssessmentDataService $assessmentService,
+        private QuestionAnalysisService $analysisService,
+        private DiagnosticReportFormatter $formatter
     ) {}
 
     public function generate(string $studentId): string
     {
-        $student = $this->students->findById($studentId);
+        $student = $this->studentService->getStudentInfo($studentId);
         if (! $student) {
             return 'Student not found.';
         }
 
-        $completedResponses = $this->responses->getCompletedByStudent($studentId);
-        if (empty($completedResponses)) {
+        $latestAssessment = $this->assessmentService->getLatestAssessment($studentId);
+        if (! $latestAssessment) {
             return 'No completed assessments found for this student.';
         }
 
-        usort($completedResponses, function ($a, $b) {
-            $dateA = Carbon::createFromFormat('d/m/Y H:i:s', $a['completed']);
-            $dateB = Carbon::createFromFormat('d/m/Y H:i:s', $b['completed']);
+        $strandResults = $this->analysisService->analyzeByStrands($latestAssessment->responses);
 
-            return $dateB->getTimestamp() <=> $dateA->getTimestamp();
-        });
-
-        $latestResponse = $completedResponses[0];
-
-        $assessment = $this->assessments->findById($latestResponse['assessmentId']);
-        $completedDate = Carbon::createFromFormat('d/m/Y H:i:s', $latestResponse['completed']);
-
-        $report = sprintf(
-            "%s recently completed %s assessment on %s\n",
-            $student['firstName'].' '.$student['lastName'],
-            $assessment['name'],
-            $completedDate->format('jS F Y g:i A')
-        );
-
-        $totalQuestions = count($latestResponse['responses']);
-        $correctAnswers = $this->calculateCorrectAnswers($latestResponse);
-
-        $report .= sprintf("He got %d questions right out of %d. Details by strand given below:\n\n",
-            $correctAnswers, $totalQuestions);
-
-        $strandResults = $this->calculateStrandResults($latestResponse);
-        foreach ($strandResults as $strand => $result) {
-            $report .= sprintf("%s: %d out of %d correct\n", $strand, $result['correct'], $result['total']);
-        }
-
-        return $report;
-    }
-
-    private function calculateCorrectAnswers(array $response): int
-    {
-        $correct = 0;
-        foreach ($response['responses'] as $studentAnswer) {
-            $question = $this->questions->findById($studentAnswer['questionId']);
-            if ($question && $studentAnswer['response'] === $question['config']['key']) {
-                $correct++;
-            }
-        }
-
-        return $correct;
-    }
-
-    private function calculateStrandResults(array $response): array
-    {
-        $strandResults = [];
-
-        foreach ($response['responses'] as $studentAnswer) {
-            $question = $this->questions->findById($studentAnswer['questionId']);
-            if (! $question) {
-                continue;
-            }
-
-            $strand = $question['strand'];
-            if (! isset($strandResults[$strand])) {
-                $strandResults[$strand] = ['correct' => 0, 'total' => 0];
-            }
-
-            $strandResults[$strand]['total']++;
-            if ($studentAnswer['response'] === $question['config']['key']) {
-                $strandResults[$strand]['correct']++;
-            }
-        }
-
-        return $strandResults;
+        return $this->formatter->formatHeader($student, $latestAssessment).
+            $this->formatter->formatSummary($latestAssessment).
+            $this->formatter->formatStrandResults($strandResults);
     }
 }
