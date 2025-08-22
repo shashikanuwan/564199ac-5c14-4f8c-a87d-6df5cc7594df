@@ -4,7 +4,6 @@ namespace App\Services;
 
 use AllowDynamicProperties;
 
-
 #[AllowDynamicProperties]
 class ReportService
 {

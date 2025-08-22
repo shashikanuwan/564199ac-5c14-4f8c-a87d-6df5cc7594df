@@ -45,7 +45,13 @@ readonly class DiagnosticReportGenerator implements ReportGeneratorInterface
         $totalQuestions = count($latestResponse['responses']);
         $correctAnswers = $this->calculateCorrectAnswers($latestResponse);
 
-        $report .= sprintf("He got %d questions right out of %d.\n", $correctAnswers, $totalQuestions);
+        $report .= sprintf("He got %d questions right out of %d. Details by strand given below:\n\n",
+            $correctAnswers, $totalQuestions);
+
+        $strandResults = $this->calculateStrandResults($latestResponse);
+        foreach ($strandResults as $strand => $result) {
+            $report .= sprintf("%s: %d out of %d correct\n", $strand, $result['correct'], $result['total']);
+        }
 
         return $report;
     }
@@ -61,5 +67,29 @@ readonly class DiagnosticReportGenerator implements ReportGeneratorInterface
         }
 
         return $correct;
+    }
+
+    private function calculateStrandResults(array $response): array
+    {
+        $strandResults = [];
+
+        foreach ($response['responses'] as $studentAnswer) {
+            $question = $this->questions->findById($studentAnswer['questionId']);
+            if (! $question) {
+                continue;
+            }
+
+            $strand = $question['strand'];
+            if (! isset($strandResults[$strand])) {
+                $strandResults[$strand] = ['correct' => 0, 'total' => 0];
+            }
+
+            $strandResults[$strand]['total']++;
+            if ($studentAnswer['response'] === $question['config']['key']) {
+                $strandResults[$strand]['correct']++;
+            }
+        }
+
+        return $strandResults;
     }
 }
