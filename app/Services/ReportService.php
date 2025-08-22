@@ -2,20 +2,19 @@
 
 namespace App\Services;
 
-use AllowDynamicProperties;
+use InvalidArgumentException;
 
-#[AllowDynamicProperties]
 class ReportService
 {
-    public function __construct(array $generators = [])
-    {
-        $this->generators = $generators;
-    }
+    public function __construct(protected array $generators = []) {}
 
     public function generate(string $type, string $studentId): string
     {
         if (! isset($this->generators[$type])) {
-            throw new \InvalidArgumentException("Report type [$type] not supported");
+            $supported = implode(', ', array_keys($this->generators));
+            throw new InvalidArgumentException(
+                "Report type [$type] not supported. Supported types: [$supported]"
+            );
         }
 
         return $this->generators[$type]->generate($studentId);
