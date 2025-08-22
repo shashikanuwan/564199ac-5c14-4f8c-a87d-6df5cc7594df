@@ -5,10 +5,10 @@ namespace App\Services\Reports\Data;
 use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\ValueObjects\StudentInfo;
 
-readonly class StudentDataService
+class StudentDataService
 {
     public function __construct(
-        private StudentRepositoryInterface $studentRepository
+        protected StudentRepositoryInterface $studentRepository
     ) {}
 
     public function getStudentInfo(string $studentId): ?StudentInfo

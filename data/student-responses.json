@@ -4,7 +4,6 @@
         "assessmentId": "assessment1",
         "assigned": "14/12/2019 10:31:00",
         "started": "16/12/2019 10:00:00",
-        "completed": "16/12/2019 10:46:00",
         "student": {
             "id": "student1",
             "yearLevel": 3
@@ -69,7 +68,6 @@
         "assessmentId": "assessment1",
         "assigned": "14/12/2020 10:31:00",
         "started": "16/12/2020 10:00:00",
-        "completed": "16/12/2020 10:46:00",
         "student": {
             "id": "student1",
             "yearLevel": 4
@@ -134,7 +132,6 @@
         "assessmentId": "assessment1",
         "assigned": "14/12/2021 10:31:00",
         "started": "16/12/2021 10:00:00",
-        "completed": "16/12/2021 10:46:00",
         "student": {
             "id": "student1",
             "yearLevel": 5

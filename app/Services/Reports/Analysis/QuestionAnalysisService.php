@@ -6,10 +6,10 @@ use App\Repositories\Contracts\QuestionRepositoryInterface;
 use App\ValueObjects\QuestionAnalysis;
 use App\ValueObjects\StrandResult;
 
-readonly class QuestionAnalysisService
+class QuestionAnalysisService
 {
     public function __construct(
-        private QuestionRepositoryInterface $questionRepository
+        protected QuestionRepositoryInterface $questionRepository
     ) {}
 
     public function analyzeWrongAnswers(array $responses): array

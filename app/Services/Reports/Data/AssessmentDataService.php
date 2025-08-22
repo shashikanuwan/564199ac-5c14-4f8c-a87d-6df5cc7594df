@@ -8,12 +8,12 @@ use App\Repositories\Contracts\ResponseRepositoryInterface;
 use App\ValueObjects\AssessmentResult;
 use Carbon\Carbon;
 
-readonly class AssessmentDataService
+class AssessmentDataService
 {
     public function __construct(
-        private ResponseRepositoryInterface $responseRepository,
-        private AssessmentRepositoryInterface $assessmentRepository,
-        private QuestionRepositoryInterface $questionRepository
+        protected ResponseRepositoryInterface $responseRepository,
+        protected AssessmentRepositoryInterface $assessmentRepository,
+        protected QuestionRepositoryInterface $questionRepository
     ) {}
 
     public function getCompletedAssessments(string $studentId): array
