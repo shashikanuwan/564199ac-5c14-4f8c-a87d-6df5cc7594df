@@ -14,12 +14,9 @@ class GenerateReport extends Command
 
     protected $description = 'Generate assessment reports for students';
 
-    private ReportService $reportService;
-
-    public function __construct(ReportService $reportService)
+    public function __construct(private readonly ReportService $reportService)
     {
         parent::__construct();
-        $this->reportService = $reportService;
     }
 
     public function handle(): int
@@ -50,12 +47,7 @@ class GenerateReport extends Command
         $this->newLine();
 
         try {
-            $report = match ($reportType) {
-                'diagnostic' => $this->reportService->generateDiagnosticReport($studentId),
-                'progress' => $this->reportService->generateProgressReport($studentId),
-                'feedback' => $this->reportService->generateFeedbackReport($studentId),
-                default => null,
-            };
+            $report = $this->reportService->generate($reportType, $studentId);
 
             if (! $report || str_contains($report, 'not found')) {
                 $this->error($report ?? 'Unable to generate report.');
@@ -66,7 +58,6 @@ class GenerateReport extends Command
             $this->line($report);
             $this->newLine();
             $this->info('✔ Report generated successfully.');
-
         } catch (\Exception $e) {
             $this->error('Error generating report: '.$e->getMessage());
 
